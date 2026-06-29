@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pharmacy Inventory Management System | Expiry Tracker | Manual Entry</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #eef2f7;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a3c5c, #2c5282);
+            color: white;
+            padding: 20px 25px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .header p {
+            margin: 5px 0 0;
+            opacity: 0.8;
+        }
+        .tab {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            flex-wrap: wrap;
+        }
+        .tab button {
+            background: none;
+            border: none;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #495057;
+        }
+        .tab button:hover {
+            background: #e9ecef;
+            color: #1a3c5c;
+        }
+        .tab button.active {
+            background: white;
+            color: #2c5282;
+            border-bottom: 3px solid #2c5282;
+        }
+        .tabcontent {
+            display: none;
+            padding: 25px;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .form-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2d3748;
+            font-size: 13px;
+        }
+        .form-group input, .form-group select {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #2c5282;
+            box-shadow: 0 0 0 3px rgba(44,82,130,0.1);
+        }
+        button {
+            background: #2c5282;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #1a3c5c;
+            transform: translateY(-1px);
+        }
+        .btn-success {
+            background: #2b6e3c;
+        }
+        .btn-success:hover {
+            background: #1e4d2a;
+        }
+        .btn-warning {
+            background: #d69e2e;
+        }
+        .btn-warning:hover {
+            background: #b7791f;
+        }
+        .btn-outline {
+            background: white;
+            color: #2c5282;
+            border: 1px solid #2c5282;
+        }
+        .btn-outline:hover {
+            background: #2c5282;
+            color: white;
+        }
+        .btn-danger {
+            background: #c53030;
+        }
+        .btn-danger:hover {
+            background: #9b2c2c;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 8px;
+            text-align: left;
+        }
+        th {
+            background: #2c5282;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover {
+            background: #1a3c5c;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .search-section {
+            background: #f0f4f8;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .result-count {
+            margin: 15px 0 10px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-reorder {
+            background: #c53030;
+            color: white;
+        }
+        .badge-ok {
+            background: #2b6e3c;
+            color: white;
+        }
+        .badge-expired {
+            background: #742a2a;
+            color: white;
+        }
+        .badge-expiring-soon {
+            background: #d69e2e;
+            color: white;
+        }
+        .badge-good {
+            background: #2b6e3c;
+            color: white;
+        }
+        .expired-row {
+            background: #fed7d7 !important;
+        }
+        .expiring-soon-row {
+            background: #feebc8 !important;
+        }
+        .flex-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .stats-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .stat-card h4 {
+            margin: 0 0 5px;
+            color: #4a5568;
+            font-size: 13px;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c5282;
+        }
+        .sort-indicator {
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+            font-size: 16px;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .manual-entry-note {
+            background: #ebf8ff;
+            border-left: 4px solid #2c5282;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .manual-entry-note strong {
+            color: #2c5282;
+        }
+        @media (max-width: 768px) {
+            .tab button { padding: 10px 16px; font-size: 13px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏥 PHARMACY INVENTORY MANAGEMENT SYSTEM</h1>
+        <p>Manual Entry | Expiry Tracker | Auto Inventory Update</p>
+    </div>
+
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'Receiving')" id="defaultOpen">📦 RECEIVING</button>
+        <button class="tablinks" onclick="openTab(event, 'Issuing')">📤 ISSUING</button>
+        <button class="tablinks" onclick="openTab(event, 'Inventory')">📋 INVENTORY</button>
+        <button class="tablinks" onclick="openTab(event, 'ExpiryTracker')">⏰ EXPIRY TRACKER</button>
+        <button class="tablinks" onclick="openTab(event, 'Dashboard')">📊 DASHBOARD</button>
+    </div>
+
+    <!-- RECEIVING TAB -->
+    <div id="Receiving" class="tabcontent">
+        <div class="form-card">
+            <h3>📥 Receive New Stock</h3>
+            <div class="manual-entry-note">
+                <strong>✏️ Manual Entry:</strong> All fields are empty. Enter drug details manually. Inventory updates automatically.
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>📅 Date Received *</label>
+                    <input type="date" id="receiptDate" class="date-picker">
+                </div>
+                <div class="form-group">
+                    <label>💊 Drug / Item *</label>
+                    <input type="text" id="receiptDrug" placeholder="Enter drug name manually">
+                </div>
+                <div class="form-group">
+                    <label>📍 Location</label>
+                    <input type="text" id="receiptLocation" placeholder="e.g., A1, B2, Fridge">
+                </div>
+                <div class="form-group">
+                    <label>🔢 Batch No.</label>
+                    <input type="text" id="receiptBatch" placeholder="Batch number">
+                </div>
+                <div class="form-group">
+                    <label>📦 Quantity Received *</label>
+                    <input type="number" id="receiptQty" placeholder="0" min="1">
+                </div>
+                <div class="form-group">
+                    <label>🏭 Supplier</label>
+                    <input type="text" id="receiptSupplier" placeholder="Supplier name">
+                </div>
+                <div class="form-group">
+                    <label>📅 Expiry Date</label>
+                    <input type="date" id="receiptExpiry">
+                </div>
+                <div class="form-group">
+                    <label>👤 Received By</label>
+                    <input type="text" id="receiptBy" placeholder="Staff name">
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <button onclick="saveReceiving()">💾 SAVE RECEIVING</button>
+                <button onclick="clearReceivingForm()" class="btn-outline" style="margin-left: 10px;">🗑️ Clear Form</button>
+            </div>
+        </div>
+
+        <h3>📜 Recent Receiving Transactions</h3>
+        <div class="table-wrapper">
+            <table id="receivingTable">
+                <thead>
+                    <tr><th>Date</th><th>Drug/Item</th><th>Location</th><th>Batch No.</th><th>Qty</th><th>Supplier</th><th>Expiry Date</th><th>Received By</th></tr>
+                </thead>
+                <tbody id="receivingBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ISSUING TAB -->
+    <div id="Issuing" class="tabcontent">
+        <div class="form-card">
+            <h3>📤 Issue Stock</h3>
+            <div class="manual-entry-note">
+                <strong>✏️ Manual Entry:</strong> Enter drug details manually. Inventory updates automatically.
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>📅 Date Issued *</label>
+                    <input type="date" id="issueDate" class="date-picker">
+                </div>
+                <div class="form-group">
+                    <label>💊 Drug / Item *</label>
+                    <input type="text" id="issueDrug" placeholder="Enter drug name manually">
+                </div>
+                <div class="form-group">
+                    <label>📍 Location</label>
+                    <input type="text" id="issueLocation" placeholder="e.g., A1, B2, Fridge">
+                </div>
+                <div class="form-group">
+                    <label>🔢 Batch No.</label>
+                    <input type="text" id="issueBatch" placeholder="Batch number">
+                </div>
+                <div class="form-group">
+                    <label>📦 Quantity Issued *</label>
+                    <input type="number" id="issueQty" placeholder="0" min="1">
+                </div>
+                <div class="form-group">
+                    <label>👤 Recipient</label>
+                    <input type="text" id="issueRecipient" placeholder="Patient/Department">
+                </div>
+                <div class="form-group">
+                    <label>✍️ Issued By</label>
+                    <input type="text" id="issueBy" placeholder="Staff name">
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <button onclick="saveIssuing()">💾 SAVE ISSUING</button>
+                <button onclick="clearIssuingForm()" class="btn-outline" style="margin-left: 10px;">🗑️ Clear Form</button>
+            </div>
+        </div>
+
+        <h3>📜 Recent Issuing Transactions</h3>
+        <div class="table-wrapper">
+            <table id="issuingTable">
+                <thead>
+                    <tr><th>Date</th><th>Drug/Item</th><th>Location</th><th>Batch No.</th><th>Qty</th><th>Recipient</th><th>Issued By</th></tr>
+                </thead>
+                <tbody id="issuingBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- INVENTORY TAB -->
+    <div id="Inventory" class="tabcontent">
+        <div class="manual-entry-note">
+            <strong>✏️ Empty Inventory:</strong> No default drugs loaded. Add drugs manually via Receiving or use the "Add Drug Manually" button below.
+        </div>
+        <div class="flex-btns">
+            <button onclick="exportToExcel()">📎 Export to CSV/Excel</button>
+            <button onclick="refreshInventory()" class="btn-outline">🔄 Refresh</button>
+            <button onclick="showAddDrugModal()" class="btn-success">➕ Add Drug Manually</button>
+            <button onclick="clearAllInventory()" class="btn-danger">🗑️ Clear All Inventory</button>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><h4>📦 Total Items</h4><div class="number" id="totalItems">0</div></div>
+            <div class="stat-card"><h4>⚠️ Low Stock</h4><div class="number" id="lowStockCount">0</div></div>
+            <div class="stat-card"><h4>🟡 Expiring Soon (30 days)</h4><div class="number" id="expiringSoonCount">0</div></div>
+            <div class="stat-card"><h4>🔴 Expired</h4><div class="number" id="expiredCount">0</div></div>
+            <div class="stat-card"><h4>💊 Total Stock Units</h4><div class="number" id="totalUnits">0</div></div>
+        </div>
+        <div class="flex-btns">
+            <button onclick="sortInventory('name')" class="btn-outline" style="font-size:12px;">🔤 Sort by Drug (A-Z)</button>
+            <button onclick="sortInventory('location')" class="btn-outline" style="font-size:12px;">📍 Sort by Location</button>
+            <button onclick="sortInventory('balance')" class="btn-outline" style="font-size:12px;">📊 Sort by Balance</button>
+            <button onclick="sortInventory('expiryDate')" class="btn-outline" style="font-size:12px;">📅 Sort by Expiry</button>
+        </div>
+        <div class="table-wrapper">
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortInventory('id')">Drug ID <span class="sort-indicator">↕</span></th>
+                        <th onclick="sortInventory('name')">Drug/Item <span class="sort-indicator">↕</span></th>
+                        <th onclick="sortInventory('location')">Location <span class="sort-indicator">↕</span></th>
+                        <th>Opening</th><th>Received</th><th>Issued</th>
+                        <th onclick="sortInventory('balance')">Balance <span class="sort-indicator">↕</span></th>
+                        <th>Reorder Lvl</th><th>Status</th>
+                        <th onclick="sortInventory('expiryDate')">Expiry Date <span class="sort-indicator">↕</span></th>
+                        <th>Expiry Status</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- EXPIRY TRACKER TAB -->
+    <div id="ExpiryTracker" class="tabcontent">
+        <h2>⏰ Drug Expiry Tracker</h2>
+        <div class="search-section">
+            <div class="form-group" style="display: inline-block; margin-right: 15px;">
+                <label>Filter by Expiry Status:</label>
+                <select id="expiryFilter" onchange="filterExpiryTable()">
+                    <option value="all">All Drugs</option>
+                    <option value="expired">Expired</option>
+                    <option value="expiring-soon">Expiring Within 30 Days</option>
+                    <option value="good">Good (More than 30 days)</option>
+                    <option value="no-date">No Expiry Date</option>
+                </select>
+            </div>
+            <button onclick="refreshExpiryTracker()" class="btn-outline">🔄 Refresh</button>
+            <button onclick="exportExpiryReport()" style="margin-left: 10px;">📎 Export Expiry Report</button>
+        </div>
+        <div class="table-wrapper">
+            <table id="expiryTable">
+                <thead>
+                    <tr>
+                        <th>Drug ID</th><th>Drug/Item</th><th>Location</th><th>Current Balance</th><th>Expiry Date</th>
+                        <th>Days Until Expiry</th><th>Status</th><th>Action Required</th>
+                    </tr>
+                </thead>
+                <tbody id="expiryBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- DASHBOARD TAB -->
+    <div id="Dashboard" class="tabcontent">
+        <div class="search-section">
+            <h3>🔍 Search Transactions by Date</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+                <div class="form-group">
+                    <label>Select Date:</label>
+                    <input type="date" id="searchDate" style="width: 200px;">
+                </div>
+                <div>
+                    <button onclick="searchReceivingByDate()">🔍 Search RECEIVING</button>
+                    <button onclick="searchIssuingByDate()" style="margin-left: 10px;">🔍 Search ISSUING</button>
+                </div>
+            </div>
+            
+            <div id="receivingResult" class="result-count"></div>
+            <div class="table-wrapper">
+                <table id="searchReceivingTable">
+                    <thead><tr><th>Date</th><th>Drug/Item</th><th>Location</th><th>Batch No.</th><th>Qty</th><th>Supplier</th><th>Expiry</th><th>Received By</th></tr></thead>
+                    <tbody id="searchReceivingBody"></tbody>
+                </table>
+            </div>
+            
+            <div id="issuingResult" class="result-count"></div>
+            <div class="table-wrapper">
+                <table id="searchIssuingTable">
+                    <thead><tr><th>Date</th><th>Drug/Item</th><th>Location</th><th>Batch No.</th><th>Qty</th><th>Recipient</th><th>Issued By</th></tr></thead>
+                    <tbody id="searchIssuingBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="search-section">
+            <h3>⚠️ STOCK ALERTS (Below Reorder Level)</h3>
+            <div class="table-wrapper">
+                <table id="alertTable">
+                    <thead><tr><th>Drug/Item</th><th>Current Balance</th><th>Reorder Level</th><th>Status</th></tr></thead>
+                    <tbody id="alertBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Drug Modal -->
+<div id="addDrugModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+    <div style="background:white; padding:30px; border-radius:16px; max-width:500px; width:90%;">
+        <h3>➕ Add Drug Manually</h3>
+        <div class="form-group">
+            <label>Drug / Item Name *</label>
+            <input type="text" id="manualDrugName" placeholder="Enter drug name">
+        </div>
+        <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="manualDrugLocation" placeholder="e.g., A1, B2, Fridge">
+        </div>
+        <div class="form-group">
+            <label>Opening Stock</label>
+            <input type="number" id="manualDrugOpening" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+            <label>Reorder Level</label>
+            <input type="number" id="manualDrugReorder" placeholder="20" value="20" min="0">
+        </div>
+        <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="date" id="manualDrugExpiry">
+        </div>
+        <div style="margin-top:20px; display:flex; gap:10px;">
+            <button onclick="addDrugManually()">💾 Add Drug</button>
+            <button onclick="closeAddDrugModal()" class="btn-outline">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== DATA STORAGE ====================
+    let receivingData = [];
+    let issuingData = [];
+    let inventoryData = [];
+    let sortConfig = { key: 'name', direction: 'asc' };
+
+    // ==================== HELPER FUNCTIONS ====================
+    function getExpiryStatus(expiryDate) {
+        if (!expiryDate || expiryDate === "") return { status: "No Date", class: "badge-ok", daysLeft: null };
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const expiry = new Date(expiryDate);
+        expiry.setHours(0, 0, 0, 0);
+        const daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+        if (daysLeft < 0) return { status: "EXPIRED", class: "badge-expired", daysLeft: daysLeft };
+        if (daysLeft <= 30) return { status: "Expiring Soon", class: "badge-expiring-soon", daysLeft: daysLeft };
+        return { status: "Good", class: "badge-good", daysLeft: daysLeft };
+    }
+
+    function generateId() {
+        const maxId = inventoryData.reduce((max, item) => {
+            const num = parseInt(item.id.replace('D', ''));
+            return num > max ? num : max;
+        }, 0);
+        return "D" + String(maxId + 1).padStart(3, '0');
+    }
+
+    // ==================== INITIALIZE ====================
+    function initializeInventory() {
+        const storedInventory = localStorage.getItem("pharmacy_inventory");
+        if(storedInventory) {
+            inventoryData = JSON.parse(storedInventory);
+        } else {
+            inventoryData = []; // Start empty - user adds manually
+            saveInventory();
+        }
+        updateDrugLists();
+    }
+
+    function saveInventory() {
+        localStorage.setItem("pharmacy_inventory", JSON.stringify(inventoryData));
+    }
+
+    function loadTransactions() {
+        const storedReceiving = localStorage.getItem("pharmacy_receiving");
+        const storedIssuing = localStorage.getItem("pharmacy_issuing");
+        if(storedReceiving) receivingData = JSON.parse(storedReceiving);
+        if(storedIssuing) issuingData = JSON.parse(storedIssuing);
+    }
+
+    // ==================== ADD DRUG MANUALLY ====================
+    function showAddDrugModal() {
+        document.getElementById("addDrugModal").style.display = "flex";
+        document.getElementById("manualDrugName").value = "";
+        document.getElementById("manualDrugLocation").value = "";
+        document.getElementById("manualDrugOpening").value = "";
+        document.getElementById("manualDrugReorder").value = "20";
+        document.getElementById("manualDrugExpiry").value = "";
+        document.getElementById("manualDrugName").focus();
+    }
+
+    function closeAddDrugModal() {
+        document.getElementById("addDrugModal").style.display = "none";
+    }
+
+    function addDrugManually() {
+        const name = document.getElementById("manualDrugName").value.trim();
+        const location = document.getElementById("manualDrugLocation").value.trim();
+        const opening = parseInt(document.getElementById("manualDrugOpening").value) || 0;
+        const reorder = parseInt(document.getElementById("manualDrugReorder").value) || 20;
+        const expiry = document.getElementById("manualDrugExpiry").value;
+
+        if(!name) {
+            alert("Please enter a Drug/Item name!");
+            return;
+        }
+
+        // Check if drug already exists
+        if(inventoryData.some(item => item.name.toLowerCase() === name.toLowerCase())) {
+            alert("⚠️ Drug already exists in inventory! Use Receiving to add more stock.");
+            return;
+        }
+
+        const newDrug = {
+            id: generateId(),
+            name: name,
+            location: location,
+            opening: opening,
+            received: 0,
+            issued: 0,
+            balance: opening,
+            reorder: reorder,
+            status: opening <= reorder ? "REORDER" : "OK",
+            expiryDate: expiry
+        };
+
+        inventoryData.push(newDrug);
+        saveInventory();
+        closeAddDrugModal();
+        refreshInventory();
+        refreshExpiryTracker();
+        updateDrugLists();
+        updateDashboardStats();
+        alert(`✅ Drug "${name}" added successfully!`);
+    }
+
+    // ==================== RECEIVING ====================
+    function saveReceiving() {
+        const expiryDate = document.getElementById("receiptExpiry").value;
+        const receipt = {
+            id: Date.now(),
+            date: document.getElementById("receiptDate").value,
+            drug: document.getElementById("receiptDrug").value.trim(),
+            location: document.getElementById("receiptLocation").value,
+            batch: document.getElementById("receiptBatch").value,
+            qty: parseInt(document.getElementById("receiptQty").value) || 0,
+            supplier: document.getElementById("receiptSupplier").value,
+            expiryDate: expiryDate,
+            receivedBy: document.getElementById("receiptBy").value
+        };
+        
+        if(!receipt.date || !receipt.drug || receipt.qty <= 0) {
+            alert("Please fill Date, Drug Name, and Valid Quantity!");
+            return;
+        }
+        
+        receivingData.unshift(receipt);
+        localStorage.setItem("pharmacy_receiving", JSON.stringify(receivingData));
+        
+        // Auto update inventory
+        let found = false;
+        for(let item of inventoryData) {
+            if(item.name.toLowerCase() === receipt.drug.toLowerCase()) {
+                item.received += receipt.qty;
+                item.balance = item.opening + item.received - item.issued;
+                item.status = item.balance <= item.reorder ? "REORDER" : "OK";
+                if(expiryDate) item.expiryDate = expiryDate;
+                if(receipt.location) item.location = receipt.location;
+                found = true;
+                break;
+            }
+        }
+        if(!found) {
+            inventoryData.push({
+                id: generateId(),
+                name: receipt.drug,
+                location: receipt.location,
+                opening: 0,
+                received: receipt.qty,
+                issued: 0,
+                balance: receipt.qty,
+                reorder: 20,
+                status: receipt.qty <= 20 ? "REORDER" : "OK",
+                expiryDate: expiryDate
+            });
+        }
+        saveInventory();
+        
+        clearReceivingForm();
+        displayReceiving();
+        refreshInventory();
+        refreshExpiryTracker();
+        updateDrugLists();
+        updateDashboardStats();
+        alert("✅ Receiving saved! Inventory updated automatically.");
+    }
+
+    // ==================== ISSUING ====================
+    function saveIssuing() {
+        const issue = {
+            id: Date.now(),
+            date: document.getElementById("issueDate").value,
+            drug: document.getElementById("issueDrug").value.trim(),
+            location: document.getElementById("issueLocation").value,
+            batch: document.getElementById("issueBatch").value,
+            qty: parseInt(document.getElementById("issueQty").value) || 0,
+            recipient: document.getElementById("issueRecipient").value,
+            issuedBy: document.getElementById("issueBy").value
+        };
+        
+        if(!issue.date || !issue.drug || issue.qty <= 0) {
+            alert("Please fill Date, Drug Name, and Valid Quantity!");
+            return;
+        }
+        
+        let found = false;
+        for(let item of inventoryData) {
+            if(item.name.toLowerCase() === issue.drug.toLowerCase()) {
+                if(item.balance >= issue.qty) {
+                    item.issued += issue.qty;
+                    item.balance = item.opening + item.received - item.issued;
+                    item.status = item.balance <= item.reorder ? "REORDER" : "OK";
+                    if(issue.location) item.location = issue.location;
+                    found = true;
+                } else {
+                    alert(`Insufficient stock! Available: ${item.balance}`);
+                    return;
+                }
+                break;
+            }
+        }
+        
+        if(!found) {
+            alert("Drug not found in inventory! Please receive stock first or add drug manually.");
+            return;
+        }
+        
+        issuingData.unshift(issue);
+        localStorage.setItem("pharmacy_issuing", JSON.stringify(issuingData));
+        saveInventory();
+        
+        clearIssuingForm();
+        displayIssuing();
+        refreshInventory();
+        refreshExpiryTracker();
+        updateDashboardStats();
+        alert("✅ Issuing saved! Inventory updated automatically.");
+    }
+
+    // ==================== SORT FUNCTION ====================
+    function sortInventory(key) {
+        if(sortConfig.key === key) {
+            sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortConfig.key = key;
+            sortConfig.direction = 'asc';
+        }
+        
+        inventoryData.sort((a, b) => {
+            let valA = a[key] || "";
+            let valB = b[key] || "";
+            
+            if(typeof valA === 'string') valA = valA.toLowerCase();
+            if(typeof valB === 'string') valB = valB.toLowerCase();
+            
+            if(valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+            if(valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        
+        refreshInventory();
+        
+        // Update sort indicators
+        document.querySelectorAll('#inventoryTable th .sort-indicator').forEach(el => el.textContent = '↕');
+        const ths = document.querySelectorAll('#inventoryTable th');
+        const indexMap = { id: 0, name: 1, location: 2, balance: 6, expiryDate: 9 };
+        if(indexMap[key] !== undefined) {
+            const th = ths[indexMap[key]];
+            if(th) {
+                const indicator = th.querySelector('.sort-indicator');
+                if(indicator) indicator.textContent = sortConfig.direction === 'asc' ? '↑' : '↓';
+            }
+        }
+    }
+
+    // ==================== DISPLAY FUNCTIONS ====================
+    function displayReceiving() {
+        const tbody = document.getElementById("receivingBody");
+        tbody.innerHTML = "";
+        if(receivingData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><span class="icon">📭</span>No receiving transactions yet</td></tr>`;
+            return;
+        }
+        for(let i = 0; i < Math.min(receivingData.length, 100); i++) {
+            const r = receivingData[i];
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = r.date || "";
+            row.insertCell(1).textContent = r.drug || "";
+            row.insertCell(2).textContent = r.location || "";
+            row.insertCell(3).textContent = r.batch || "";
+            row.insertCell(4).textContent = r.qty || 0;
+            row.insertCell(5).textContent = r.supplier || "";
+            row.insertCell(6).textContent = r.expiryDate || "";
+            row.insertCell(7).textContent = r.receivedBy || "";
+        }
+    }
+
+    function displayIssuing() {
+        const tbody = document.getElementById("issuingBody");
+        tbody.innerHTML = "";
+        if(issuingData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><span class="icon">📭</span>No issuing transactions yet</td></tr>`;
+            return;
+        }
+        for(let i = 0; i < Math.min(issuingData.length, 100); i++) {
+            const r = issuingData[i];
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = r.date || "";
+            row.insertCell(1).textContent = r.drug || "";
+            row.insertCell(2).textContent = r.location || "";
+            row.insertCell(3).textContent = r.batch || "";
+            row.insertCell(4).textContent = r.qty || 0;
+            row.insertCell(5).textContent = r.recipient || "";
+            row.insertCell(6).textContent = r.issuedBy || "";
+        }
+    }
+
+    function refreshInventory() {
+        const tbody = document.getElementById("inventoryBody");
+        tbody.innerHTML = "";
+        let totalUnits = 0, lowStock = 0, expiringSoon = 0, expired = 0;
+        
+        if(inventoryData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="11" class="empty-state"><span class="icon">📭</span>No drugs in inventory. Add drugs via Receiving or "Add Drug Manually".</td></tr>`;
+            document.getElementById("totalItems").textContent = "0";
+            document.getElementById("lowStockCount").textContent = "0";
+            document.getElementById("expiringSoonCount").textContent = "0";
+            document.getElementById("expiredCount").textContent = "0";
+            document.getElementById("totalUnits").textContent = "0";
+            return;
+        }
+        
+        for(let item of inventoryData) {
+            totalUnits += item.balance;
+            if(item.balance <= item.reorder && item.balance > 0) lowStock++;
+            
+            const expiryInfo = getExpiryStatus(item.expiryDate);
+            if(expiryInfo.status === "EXPIRED") expired++;
+            if(expiryInfo.status === "Expiring Soon") expiringSoon++;
+            
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = item.id;
+            row.insertCell(1).textContent = item.name;
+            row.insertCell(2).textContent = item.location || "";
+            row.insertCell(3).textContent = item.opening;
+            row.insertCell(4).textContent = item.received;
+            row.insertCell(5).textContent = item.issued;
+            row.insertCell(6).innerHTML = `<strong>${item.balance}</strong>`;
+            row.insertCell(7).textContent = item.reorder;
+            const statusCell = row.insertCell(8);
+            statusCell.innerHTML = item.status === "REORDER" ? '<span class="badge badge-reorder">⚠️ REORDER</span>' : '<span class="badge badge-ok">✓ OK</span>';
+            row.insertCell(9).textContent = item.expiryDate || "Not set";
+            const expiryStatusCell = row.insertCell(10);
+            expiryStatusCell.innerHTML = `<span class="badge ${expiryInfo.class}">${expiryInfo.status}</span>`;
+            
+            if(expiryInfo.status === "EXPIRED") row.classList.add("expired-row");
+            else if(expiryInfo.status === "Expiring Soon") row.classList.add("expiring-soon-row");
+        }
+        
+        document.getElementById("totalItems").textContent = inventoryData.length;
+        document.getElementById("lowStockCount").textContent = lowStock;
+        document.getElementById("expiringSoonCount").textContent = expiringSoon;
+        document.getElementById("expiredCount").textContent = expired;
+        document.getElementById("totalUnits").textContent = totalUnits.toLocaleString();
+    }
+
+    function refreshExpiryTracker() {
+        const tbody = document.getElementById("expiryBody");
+        const filter = document.getElementById("expiryFilter")?.value || "all";
+        tbody.innerHTML = "";
+        
+        if(inventoryData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><span class="icon">📭</span>No drugs in inventory. Add drugs first.</td></tr>`;
+            return;
+        }
+        
+        const sortedItems = [...inventoryData].sort((a, b) => {
+            if(!a.expiryDate) return 1;
+            if(!b.expiryDate) return -1;
+            return new Date(a.expiryDate) - new Date(b.expiryDate);
+        });
+        
+        for(let item of sortedItems) {
+            const expiryInfo = getExpiryStatus(item.expiryDate);
+            
+            if(filter === "expired" && expiryInfo.status !== "EXPIRED") continue;
+            if(filter === "expiring-soon" && expiryInfo.status !== "Expiring Soon") continue;
+            if(filter === "good" && expiryInfo.status !== "Good") continue;
+            if(filter === "no-date" && item.expiryDate) continue;
+            if(filter === "no-date" && !item.expiryDate) {}
+            
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = item.id;
+            row.insertCell(1).textContent = item.name;
+            row.insertCell(2).textContent = item.location || "";
+            row.insertCell(3).innerHTML = `<strong>${item.balance}</strong>`;
+            row.insertCell(4).textContent = item.expiryDate || "Not set";
+            row.insertCell(5).textContent = expiryInfo.daysLeft !== null ? expiryInfo.daysLeft + " days" : "N/A";
+            row.insertCell(6).innerHTML = `<span class="badge ${expiryInfo.class}">${expiryInfo.status}</span>`;
+            
+            let action = "";
+            if(expiryInfo.status === "EXPIRED") action = "⚠️ DISCARD IMMEDIATELY";
+            else if(expiryInfo.status === "Expiring Soon") action = "🔔 Use first / Move to front";
+            else if(!item.expiryDate) action = "📝 Add expiry date";
+            else action = "✓ OK";
+            row.insertCell(7).innerHTML = action;
+            
+            if(expiryInfo.status === "EXPIRED") row.classList.add("expired-row");
+            else if(expiryInfo.status === "Expiring Soon") row.classList.add("expiring-soon-row");
+        }
+    }
+
+    function filterExpiryTable() {
+        refreshExpiryTracker();
+    }
+
+    function updateDrugLists() {
+        // No datalists needed for manual entry, but keep for compatibility
+    }
+
+    function updateDashboardStats() {
+        const tbody = document.getElementById("alertBody");
+        tbody.innerHTML = "";
+        const alerts = inventoryData.filter(i => i.balance <= i.reorder && i.balance > 0);
+        if(alerts.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="empty-state">✅ No stock alerts - all levels OK</td></tr>`;
+            return;
+        }
+        for(let item of alerts) {
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = item.name;
+            row.insertCell(1).innerHTML = `<strong style="color:#c53030;">${item.balance}</strong>`;
+            row.insertCell(2).textContent = item.reorder;
+            row.insertCell(3).innerHTML = '<span class="badge badge-reorder">REORDER NOW!</span>';
+        }
+    }
+
+    // ==================== SEARCH FUNCTIONS ====================
+    function searchReceivingByDate() {
+        const searchDate = document.getElementById("searchDate").value;
+        const tbody = document.getElementById("searchReceivingBody");
+        tbody.innerHTML = "";
+        if(!searchDate) {
+            document.getElementById("receivingResult").innerHTML = "📋 Please select a date first.";
+            return;
+        }
+        const filtered = receivingData.filter(r => r.date === searchDate);
+        if(filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No receiving transactions on ${searchDate}</td></tr>`;
+        } else {
+            for(let r of filtered) {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = r.date || "";
+                row.insertCell(1).textContent = r.drug || "";
+                row.insertCell(2).textContent = r.location || "";
+                row.insertCell(3).textContent = r.batch || "";
+                row.insertCell(4).textContent = r.qty || 0;
+                row.insertCell(5).textContent = r.supplier || "";
+                row.insertCell(6).textContent = r.expiryDate || "";
+                row.insertCell(7).textContent = r.receivedBy || "";
+            }
+        }
+        document.getElementById("receivingResult").innerHTML = `📋 Found ${filtered.length} receiving transaction(s) on ${searchDate}`;
+    }
+
+    function searchIssuingByDate() {
+        const searchDate = document.getElementById("searchDate").value;
+        const tbody = document.getElementById("searchIssuingBody");
+        tbody.innerHTML = "";
+        if(!searchDate) {
+            document.getElementById("issuingResult").innerHTML = "📋 Please select a date first.";
+            return;
+        }
+        const filtered = issuingData.filter(r => r.date === searchDate);
+        if(filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No issuing transactions on ${searchDate}</td></tr>`;
+        } else {
+            for(let r of filtered) {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = r.date || "";
+                row.insertCell(1).textContent = r.drug || "";
+                row.insertCell(2).textContent = r.location || "";
+                row.insertCell(3).textContent = r.batch || "";
+                row.insertCell(4).textContent = r.qty || 0;
+                row.insertCell(5).textContent = r.recipient || "";
+                row.insertCell(6).textContent = r.issuedBy || "";
+            }
+        }
+        document.getElementById("issuingResult").innerHTML = `📋 Found ${filtered.length} issuing transaction(s) on ${searchDate}`;
+    }
+
+    // ==================== UTILITIES ====================
+    function clearReceivingForm() {
+        document.getElementById("receiptDrug").value = "";
+        document.getElementById("receiptLocation").value = "";
+        document.getElementById("receiptBatch").value = "";
+        document.getElementById("receiptQty").value = "";
+        document.getElementById("receiptSupplier").value = "";
+        document.getElementById("receiptExpiry").value = "";
+        document.getElementById("receiptBy").value = "";
+        document.getElementById("receiptDate").value = new Date().toISOString().split('T')[0];
+    }
+
+    function clearIssuingForm() {
+        document.getElementById("issueDrug").value = "";
+        document.getElementById("issueLocation").value = "";
+        document.getElementById("issueBatch").value = "";
+        document.getElementById("issueQty").value = "";
+        document.getElementById("issueRecipient").value = "";
+        document.getElementById("issueBy").value = "";
+        document.getElementById("issueDate").value = new Date().toISOString().split('T')[0];
+    }
+
+    function clearAllInventory() {
+        if(confirm("⚠️ This will delete ALL drugs from inventory. Continue?")) {
+            inventoryData = [];
+            saveInventory();
+            refreshInventory();
+            refreshExpiryTracker();
+            updateDashboardStats();
+            alert("Inventory cleared!");
+        }
+    }
+
+    function exportToExcel() {
+        if(inventoryData.length === 0) {
+            alert("No data to export!");
+            return;
+        }
+        let csv = "Drug ID,Drug/Item,Location,Opening Stock,Received Qty,Issued Qty,Balance,Reorder Level,Status,Expiry Date,Expiry Status\n";
+        inventoryData.forEach(item => {
+            const expiryInfo = getExpiryStatus(item.expiryDate);
+            csv += `"${item.id}","${item.name}","${item.location}",${item.opening},${item.received},${item.issued},${item.balance},${item.reorder},"${item.status}","${item.expiryDate || ""}","${expiryInfo.status}"\n`;
+        });
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "inventory_export.csv";
+        link.click();
+    }
+
+    function exportExpiryReport() {
+        if(inventoryData.length === 0) {
+            alert("No data to export!");
+            return;
+        }
+        let csv = "Drug ID,Drug/Item,Location,Current Balance,Expiry Date,Days Until Expiry,Status,Action Required\n";
+        inventoryData.forEach(item => {
+            const expiryInfo = getExpiryStatus(item.expiryDate);
+            let action = "";
+            if(expiryInfo.status === "EXPIRED") action = "DISCARD IMMEDIATELY";
+            else if(expiryInfo.status === "Expiring Soon") action = "Use first / Move to front";
+            else if(!item.expiryDate) action = "Add expiry date";
+            else action = "OK";
+            csv += `"${item.id}","${item.name}","${item.location}",${item.balance},"${item.expiryDate || ""}",${expiryInfo.daysLeft !== null ? expiryInfo.daysLeft : "N/A"},"${expiryInfo.status}","${action}"\n`;
+        });
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "expiry_tracker_report.csv";
+        link.click();
+    }
+
+    function setDefaultDates() {
+        const today = new Date().toISOString().split('T')[0];
+        if(document.getElementById("receiptDate")) document.getElementById("receiptDate").value = today;
+        if(document.getElementById("issueDate")) document.getElementById("issueDate").value = today;
+        if(document.getElementById("searchDate")) document.getElementById("searchDate").value = today;
+    }
+
+    function openTab(evt, tabName) {
+        const contents = document.getElementsByClassName("tabcontent");
+        for(let c of contents) c.style.display = "none";
+        const links = document.getElementsByClassName("tablinks");
+        for(let l of links) l.className = l.className.replace(" active", "");
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+        if(tabName === "Inventory") refreshInventory();
+        if(tabName === "ExpiryTracker") refreshExpiryTracker();
+        if(tabName === "Dashboard") updateDashboardStats();
+    }
+
+    // Close modal on outside click
+    document.getElementById("addDrugModal").addEventListener("click", function(e) {
+        if(e.target === this) closeAddDrugModal();
+    });
+
+    // Enter key for manual drug add
+    document.getElementById("manualDrugName").addEventListener("keydown", function(e) {
+        if(e.key === "Enter") document.getElementById("manualDrugLocation").focus();
+    });
+    document.getElementById("manualDrugLocation").addEventListener("keydown", function(e) {
+        if(e.key === "Enter") document.getElementById("manualDrugOpening").focus();
+    });
+    document.getElementById("manualDrugOpening").addEventListener("keydown", function(e) {
+        if(e.key === "Enter") document.getElementById("manualDrugReorder").focus();
+    });
+    document.getElementById("manualDrugReorder").addEventListener("keydown", function(e) {
+        if(e.key === "Enter") document.getElementById("manualDrugExpiry").focus();
+    });
+    document.getElementById("manualDrugExpiry").addEventListener("keydown", function(e) {
+        if(e.key === "Enter") addDrugManually();
+    });
+
+    // ==================== INIT ====================
+    function init() {
+        initializeInventory();
+        loadTransactions();
+        setDefaultDates();
+        displayReceiving();
+        displayIssuing();
+        refreshInventory();
+        refreshExpiryTracker();
+        updateDashboardStats();
+        document.getElementById("defaultOpen").click();
+    }
+
+    init();
+</script>
+</body>
+</html>
